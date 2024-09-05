@@ -9,23 +9,16 @@ class LightGCN(torch.nn.Module):
         super(LightGCN, self).__init__()
         self.config = config
         self.dataset = dataset
+        self.embeddign_user = nn.Embedding.from_pretrained(dataset.get_embeddings()[0])
+        self.embeddign_item = nn.Embedding.from_pretrained(dataset.get_embeddings()[1])
         self.__init_weight()
+        breakpoint()
 
     def __init_weight(self):
-        self.num_users  = self.dataset.n_users
-        self.num_items  = self.dataset.m_items
-        self.latent_dim = self.config['latent_dim_rec']
-        self.n_layers = self.config['lightGCN_n_layers']
-        self.keep_prob = self.config['keep_prob']
-        self.A_split = self.config['A_split']
-        self.embedding_user = torch.nn.Embedding(
-            num_embeddings=self.num_users, embedding_dim=self.latent_dim)
-        self.embedding_item = torch.nn.Embedding(
-            num_embeddings=self.num_items, embedding_dim=self.latent_dim)
-        nn.init.normal_(self.embedding_user.weight, std=0.1)
-        nn.init.normal_(self.embedding_item.weight, std=0.1)           
+        self.num_users, self.num_items  = self.dataset.num_nodes
+        self.n_layers = self.config.num_layers           
         self.f = nn.Sigmoid()
-        self.Graph = self.dataset.getSparseGraph()
+        self.Graph = self.dataset.get_adj_matrix()
         
     def computer(self):
         """

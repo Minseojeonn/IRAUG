@@ -46,7 +46,6 @@ def split_data(
 def load_data(
     dataset_path: str,
     direction: bool,
-    node_idx_type: str
 ) -> np.array:
     """Read data from a file
 
@@ -69,16 +68,6 @@ def load_data(
             edgelist.append((a, b, s))
     num_of_nodes = get_num_nodes(np.array(edgelist))
     edgelist = np.array(edgelist)
-
-    if node_idx_type.lower() == "uni":
-        for idx, edge in enumerate(edgelist.tolist()):
-            fr, to, sign = edge
-            edgelist[idx] = (fr, to+num_of_nodes[0], sign)
-        edgelist = np.array(edgelist)
-        assert len(set(edgelist[:, 0].tolist()).intersection(
-            set(edgelist[:, 1].tolist()))) == 0, "something worng"
-        
-        num_of_nodes = sum(num_of_nodes)
 
     if direction == False:
         edgelist = edgelist.tolist()

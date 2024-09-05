@@ -9,6 +9,7 @@ from parser import parsing
 from utils import set_random_seed
 from dataset.DataTemplate import DataTemplate
 from torch.utils.data import DataLoader 
+from model.LightGCN import LightGCN
 
 
 def main():
@@ -28,15 +29,14 @@ def main():
     set_random_seed(seed=args_enviroments.seed, device=args_enviroments.device)
 
     # Step 1. Preprocessing the dataset and load the dataset
-    datatemplate = DataTemplate(args_enviroments.dataset_name, args_enviroments.seed, args_enviroments.split_ratio, args_enviroments.dataset_shuffle, args_enviroments.device, args_enviroments.direction, args_enviroments.node_idx_type, args_enviroments.input_dim)
+    datatemplate = DataTemplate(args_enviroments.dataset_name, args_enviroments.seed, args_enviroments.split_ratio, args_enviroments.dataset_shuffle, args_enviroments.device, args_enviroments.direction, args_enviroments.input_dim)
     train_dataset, valid_dataset, test_dataset = datatemplate.get_dataset()
     train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True)
     valid_loader = DataLoader(valid_dataset, batch_size=256, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False)
-    breakpoint()
     
     # Step 2. Model definition
-    
+    model = LightGCN(args_enviroments, datatemplate)
 
 
 
