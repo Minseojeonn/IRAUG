@@ -44,9 +44,12 @@ class DataTemplate(object):
         self.input_dim = input_dim
         assert node_idx_type.lower() in [
             "uni", "bi"], "not supported node_idx_type"
+        assert node_idx_type.lower() == "uni", "only uni_type is supported"
         assert np.isclose(sum(split_ratio), 1).item(
         ), "sum of split_ratio is not 1"
         self.processing()
+        self.build_trainnormajd()
+        breakpoint()
 
     def processing(
         self,
@@ -74,7 +77,7 @@ class DataTemplate(object):
         """
         if self.node_idx_type == "uni":
             embeddings = torch.nn.init.xavier_uniform_(torch.empty(
-                (sum(self.num_nodes), self.input_dim)))
+                (self.num_nodes, self.input_dim)))
             return embeddings
         elif self.node_idx_type == "bi":
             self.embeddings_user = torch.nn.init.xavier_uniform_(
@@ -82,3 +85,21 @@ class DataTemplate(object):
             self.embeddings_item = torch.nn.init.xavier_uniform_(
                 torch.empty(self.num_nodes[1], self.input_dim))
             return [self.embeddings_user, self.embeddings_item]
+        
+    def build_trainnormajd(self):
+        self.adj_matrix = torch.sparse_coo_tensor(torch.LongTensor(self.processed_dataset["train_edges"]).T, torch.LongTensor(self.processed_dataset["train_label"]), torch.Size([self.num_nodes, self.num_nodes]), dtype=torch.long, device=self.device)
+        dense = self.adj_matrix.to_dense().abs()
+        row_sum = torch.sum(dense.abs(), dim=1).float() #row sum
+        col_sum = torch.sum(dense.abs(), dim=0).float() #col sum
+        row_sum[row_sum==0.] = 1. #avoid div 0 
+        col_sum[col_sum==0.] = 1.
+        row_degree = torch.sqrt(row_sum).unsqueeze(dim=1) #row sum sqrt
+        col_degree = torch.sqrt(col_sum).unsqueeze(dim=0) #col sum sqrtz
+        dense = dense/(row_degree.t() * col_degree)
+        breakpoint()
+        index = dense.nonzero() 
+        data  = dense[dense >= 1e-9]
+        assert len(index) == len(data)
+        self.adj_matrix = torch.sparse.FloatTensor(index.t(), data, torch.Size([self.num_nodes, self.num_nodes]))
+        self.adj_matrix = self.adj_matrix.coalesce().to(self.device)
+        del dense, index, data, row_degree, col_degree, row_sum, col_sum
