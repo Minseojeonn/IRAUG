@@ -1,5 +1,6 @@
 import random
 import torch
+from sklearn.metrics import roc_auc_score
 import numpy as np
 
 def set_random_seed(seed, device):
@@ -21,3 +22,12 @@ def set_random_seed(seed, device):
 
 def logging_with_mlflow(epochs, val_metric, test_metric):
     pass
+
+# ====================Metrics==============================
+# =========================================================
+def compute_precision_recall(targets, predictions, k):
+    pred = predictions[:k]
+    num_hit = len(set(pred).intersection(set(targets)))
+    precision = float(num_hit) / len(pred)
+    recall = float(num_hit) / len(targets)
+    return precision, recall

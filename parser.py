@@ -13,5 +13,9 @@ def parsing():
     parser.add_argument('--input_dim', default=256, type=int, help='input_dim')
     parser.add_argument('--batch_size', default=256, type=int, help='batch_size')
     parser.add_argument('--num_layers', default=3, type=int, help='num_layer')
+    parser.add_argument('--epochs', default=100, type=int, help='epochs')
+    parser.add_argument('--wdc', default=0.01, type=float, help='wdc')
+    parser.add_argument('--lr', default=0.001, type=float, help='lr')
+    parser.add_argument('--topk', default=10, type=int, help='topk')
     args = parser.parse_args()
     return args

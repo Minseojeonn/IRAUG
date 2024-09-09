@@ -9,17 +9,15 @@ class LightGCN(torch.nn.Module):
         super(LightGCN, self).__init__()
         self.config = config
         self.dataset = dataset
-        self.embeddign_user = nn.Embedding.from_pretrained(dataset.get_embeddings()[0])
-        self.embeddign_item = nn.Embedding.from_pretrained(dataset.get_embeddings()[1])
-        self.__init_weight()
-        breakpoint()
-
-    def __init_weight(self):
+        self.embedding_user = nn.Embedding.from_pretrained(dataset.get_embeddings()[0])
+        self.embedding_user.weight.requires_grad = True
+        self.embedding_item = nn.Embedding.from_pretrained(dataset.get_embeddings()[1])
+        self.embedding_item.weight.requires_grad = True
         self.num_users, self.num_items  = self.dataset.num_nodes
         self.n_layers = self.config.num_layers           
         self.f = nn.Sigmoid()
         self.Graph = self.dataset.get_adj_matrix()
-        
+                
     def computer(self):
         """
         propagate methods for lightGCN
@@ -29,17 +27,8 @@ class LightGCN(torch.nn.Module):
         all_emb = torch.cat([users_emb, items_emb])
         embs = [all_emb]
         g_droped = self.Graph    
-        
-        for layer in range(self.n_layers):
-            if self.A_split:
-                temp_emb = []
-                for f in range(len(g_droped)):
-                    temp_emb.append(torch.sparse.mm(g_droped[f], all_emb))
-                side_emb = torch.cat(temp_emb, dim=0)
-                all_emb = side_emb
-            else:
-                all_emb = torch.sparse.mm(g_droped, all_emb)
-            embs.append(all_emb)
+        all_emb = torch.sparse.mm(g_droped, all_emb)
+        embs.append(all_emb)
         embs = torch.stack(embs, dim=1)
         light_out = torch.mean(embs, dim=1)
         users, items = torch.split(light_out, [self.num_users, self.num_items])
@@ -57,12 +46,17 @@ class LightGCN(torch.nn.Module):
         users_emb = all_users[users]
         pos_emb = all_items[pos_items]
         neg_emb = all_items[neg_items]
+        
         users_emb_ego = self.embedding_user(users)
         pos_emb_ego = self.embedding_item(pos_items)
         neg_emb_ego = self.embedding_item(neg_items)
+        
         return users_emb, pos_emb, neg_emb, users_emb_ego, pos_emb_ego, neg_emb_ego
     
-    def bpr_loss(self, users, pos, neg):
+    def bpr_loss(self, users, pos, neg): #pos = positive items, neg = negative items // item must be one to one
+        
+        pos = pos - self.num_users
+        neg = neg - self.num_users
         (users_emb, pos_emb, neg_emb, 
         userEmb0,  posEmb0, negEmb0) = self.getEmbedding(users.long(), pos.long(), neg.long())
         reg_loss = (1/2)*(userEmb0.norm(2).pow(2) + 

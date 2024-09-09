@@ -69,6 +69,8 @@ def load_data(
     num_of_nodes = get_num_nodes(np.array(edgelist))
     edgelist = np.array(edgelist)
 
+    assert max(edgelist[:,0]) > min(edgelist[:,1]), "user id and item id must be separated"
+    edgelist[:,1] = edgelist[:,1] + num_of_nodes[0]
     if direction == False:
         edgelist = edgelist.tolist()
         for idx, edgelist in enumerate(edgelist):
@@ -77,8 +79,12 @@ def load_data(
         edgelist = np.array(edgelist)
 
     num_edges = np.array(edgelist).shape[0]
-
-    return edgelist, num_of_nodes, num_edges
+    
+    user_item_dict = defaultdict(list)
+    for edge in edgelist:
+        user_item_dict[edge[0]].append(edge[1])
+        
+    return edgelist, num_of_nodes, num_edges, user_item_dict
 
 
 def get_num_nodes(
