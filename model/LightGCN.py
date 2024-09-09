@@ -54,7 +54,6 @@ class LightGCN(torch.nn.Module):
         return users_emb, pos_emb, neg_emb, users_emb_ego, pos_emb_ego, neg_emb_ego
     
     def bpr_loss(self, users, pos, neg): #pos = positive items, neg = negative items // item must be one to one
-        
         pos = pos - self.num_users
         neg = neg - self.num_users
         (users_emb, pos_emb, neg_emb, 

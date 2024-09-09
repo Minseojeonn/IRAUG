@@ -7,7 +7,7 @@ import torch.utils.data as data
 
 
 def split_data(
-    array_of_edges: np.array,
+    user_item_dict: dict,
     split_ratio: list,
     seed: int,
     dataset_shuffle: bool,
@@ -26,21 +26,29 @@ def split_data(
 
     assert np.isclose(sum(split_ratio), 1), "train+test+valid != 1"
     train_ratio, valid_ratio, test_ratio = split_ratio
-    train_X, test_val_X, train_Y, test_val_Y = train_test_split(
-        array_of_edges[:, :2], array_of_edges[:, 2], test_size=1 - train_ratio, random_state=seed, shuffle=dataset_shuffle)
-    val_X, test_X, val_Y, test_Y = train_test_split(test_val_X, test_val_Y, test_size=test_ratio/(
-        test_ratio + valid_ratio), random_state=seed, shuffle=dataset_shuffle)
-
-    dataset_dict = {
-        "train_edges": train_X,
-        "train_label": train_Y,
-        "valid_edges": val_X,
-        "valid_label": val_Y,
-        "test_edges": test_X,
-        "test_label": test_Y
-    }
-
-    return dataset_dict
+    
+    num_user = len(user_item_dict)
+    num_train = int(num_user * train_ratio)
+    num_valid = int(num_user * valid_ratio)
+    num_test = num_user - num_train - num_valid
+    
+    user_idx = [i for i in range(num_user+1)]
+    user_idx = np.random.permutation(user_idx).tolist()
+    
+    train = {}
+    valid = {}
+    test = {}
+    
+    for i in user_idx[:num_train]:
+        train[i] = user_item_dict[i]
+    for i in user_idx[num_train:num_train+num_valid]:
+        valid[i] = user_item_dict[i]
+    for i in user_idx[num_train+num_valid:]:
+        test[i] = user_item_dict[i]
+    
+    proprecessed_dataset = {"train": train, "valid": valid, "test": test}
+    
+    return proprecessed_dataset
 
 
 def load_data(

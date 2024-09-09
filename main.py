@@ -49,8 +49,8 @@ def main():
         for batch in train_loader:
             #label is not used, cause it is unsigned model
             opt.zero_grad()
-            edge, label, unseen = batch
-            user, pos, neg = edge[:, 0].to(device), edge[:, 1].to(device), unseen.to(device)
+            user, pos, neg = batch
+            user, pos, neg = user.to(device), pos.to(device), neg.to(device)
             loss_1, loss_2 = model.bpr_loss(user, pos, neg)
             loss = loss_1 + args_enviroments.wdc * loss_2
             loss.backward()
@@ -58,6 +58,7 @@ def main():
             total_loss += loss.item()
         model.eval()
         print(f"Epoch {epoch} Loss: {total_loss / len(train_loader)}")
+        '''
         if epoch % 10 == 0:
             with torch.no_grad():
                 precision, recall = [], []
@@ -68,7 +69,7 @@ def main():
                     precision.append(precision_)
                     recall.append(recall_)
                 print(f"Epoch {epoch} Valid Precision: {sum(precision) / len(valid_loader)} Recall: {sum(recall) / len(valid_loader)}")
-        
+        '''
     # Step 5. Evaluation
     
 
