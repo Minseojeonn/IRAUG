@@ -31,3 +31,9 @@ def compute_precision_recall(targets, predictions, k):
     precision = float(num_hit) / len(pred)
     recall = float(num_hit) / len(targets)
     return precision, recall
+
+
+def collate_fn(batch):
+    user, items = zip(*batch)
+    user = torch.LongTensor(user)
+    return user, items

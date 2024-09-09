@@ -2,7 +2,7 @@ import torch
 import numpy as np
 import torch.utils.data as data
 
-class DatasetClass(data.Dataset):
+class TrnDatasetClass(data.Dataset):
     """
     Dataset class with optimized negative sampling using numpy for set operations.
     
@@ -19,7 +19,6 @@ class DatasetClass(data.Dataset):
         self.device = device
         self.user_item_dict = user_item_dict
         self.num_nodes = num_nodes
-        self.len = len(user_item_dict)
         # Negative sampling optimized to run during initialization
         self.unseen_items = self.negative_sampling(user_item_dict, num_nodes)
         self.user_list, self.pos, self.neg = self.flatten(user_item_dict, self.unseen_items)
@@ -62,3 +61,27 @@ class DatasetClass(data.Dataset):
     def __getitem__(self, index):
         # 각 데이터셋의 배치를 반환
         return  self.user_list[index], self.pos[index], self.neg[index]
+
+class EvalDatasetClass(data.Dataset):
+    def __init__(self, user_item_dict: dict, num_nodes: tuple, device='cpu') -> None:
+        self.device = device
+        self.user_item_dict = user_item_dict
+        self.num_nodes = num_nodes
+        self.map_dict = self.mapping(user_item_dict)
+        self.len = len(self.map_dict)      
+        
+    def __len__(self):
+        return self.len
+    
+    def __getitem__(self, index):
+        idx = self.map_dict[index]
+        items = self.user_item_dict[idx]
+        user = idx
+        return user, items
+    
+    def mapping(self, user_item_dict):
+        map_dict = {}
+        for i in user_item_dict:
+            map_dict[len(map_dict)] = i
+        return map_dict
+    

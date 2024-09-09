@@ -110,3 +110,8 @@ def get_num_nodes(
     num_nodes_item = np.amax(dataset[:, 1]) + 1
     return (num_nodes_user.item(), num_nodes_item.item())
 
+
+def collate_fn(batch):
+    breakpoint()
+    user, items = zip(*batch)
+    return user, items

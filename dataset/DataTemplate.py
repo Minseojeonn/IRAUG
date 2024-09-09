@@ -4,7 +4,7 @@ import torch.utils.data.dataset as Dataset
 import torch
 
 from dataset.utils import split_data, load_data
-from dataset.DatasetClass import DatasetClass
+from dataset.DatasetClass import TrnDatasetClass, EvalDatasetClass
 
 
 class DataTemplate(object):
@@ -57,9 +57,9 @@ class DataTemplate(object):
         
 
     def get_dataset(self):
-        train_dataset = DatasetClass(self.processed_dataset["train"], self.num_nodes, self.device)
-        val_dataset = DatasetClass(self.processed_dataset["valid"], self.num_nodes, self.device)
-        test_dataset = DatasetClass(self.processed_dataset["test"], self.num_nodes, self.device) 
+        train_dataset = TrnDatasetClass(self.processed_dataset["train"], self.num_nodes, self.device)
+        val_dataset = EvalDatasetClass(self.processed_dataset["valid"], self.num_nodes, self.device)
+        test_dataset = EvalDatasetClass(self.processed_dataset["test"], self.num_nodes, self.device) 
         
         return train_dataset, val_dataset, test_dataset
     
