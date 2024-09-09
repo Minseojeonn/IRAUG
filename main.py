@@ -6,7 +6,7 @@ import dotmap
 #from
 from fire import Fire
 from parser import parsing
-from utils import set_random_seed, compute_precision_recall, collate_fn
+from utils import set_random_seed, collate_fn, select_top_k, precision_recall_at_k
 from dataset.DataTemplate import DataTemplate
 from torch.utils.data import DataLoader 
 from model.LightGCN import LightGCN
@@ -66,6 +66,8 @@ def main():
                     user, items = batch
                     user, items = user.to(device), items
                     pred_rating = model.getUsersRating(user)
+                    pred_items = select_top_k(pred_rating, args_enviroments.topk)
+                    precision_recall_at_k(items, pred_items)
                     breakpoint()
                 print(f"Epoch {epoch} Valid Precision: {sum(precision) / len(valid_loader)} Recall: {sum(recall) / len(valid_loader)}")
         
