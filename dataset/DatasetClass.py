@@ -31,13 +31,14 @@ class TrnDatasetClass(data.Dataset):
         Optimized negative sampling using numpy for set operations.
         """
         num_users, num_items = num_nodes
+
         all_items = np.arange(num_users, num_users + num_items)  # 아이템 ID 범위 생성
         
         unseen_item_dict = {}
         for user in user_item_dict:
             seen_items = np.array(user_item_dict[user])  # 사용자가 본 아이템
             unseen_items = np.setdiff1d(all_items, seen_items)  # 보지 않은 아이템 찾기
-            unseen_items = np.random.choice(unseen_items, size=len(user_item_dict[user]))  # 보지 않은 아이템 중 100개 샘플링
+            unseen_items = np.random.choice(unseen_items, size=len(user_item_dict[user]))  # 보지 않은 아이템 중 샘플링
             unseen_item_dict[user] = unseen_items
 
         return unseen_item_dict

@@ -40,9 +40,8 @@ def precision_recall(actual, recommended, num_users):
     relevant_and_recommended = []
     len_actual = 0
     for ac, rec in zip(actual, recommended):
-        intersection = set(ac).intersection(set(rec))
-        #breakpoint()
-        relevant_and_recommended.extend(list(intersection))
+        inter = set(ac).intersection(set(rec.tolist()))
+        relevant_and_recommended.extend(list(inter))
         len_actual += len(ac)
     # Precision: 추천된 항목 중에서 실제로 선호한 항목의 비율
     precision = len(relevant_and_recommended) / (len(recommended_at_k[0]) * len(actual)) 
@@ -58,12 +57,13 @@ def select_top_k(user, pred, top_k, seen_items, num_users):
         pred (torch.tensor): (num_user, all_items)
         top_k (int): top k items
     """
-    for idx, i in enumerate(user):
-        user_idx = i.item()
-        seen_item_idx = seen_items[user_idx]
-        seen_item_idx = [i-num_users for i in seen_item_idx] 
-        for item_idx in seen_item_idx:
-            pred[idx][item_idx] = -1e9
+    if seen_items is not None:
+        for idx, i in enumerate(user):
+            user_idx = i.item()
+            seen_item_idx = seen_items[user_idx]
+            seen_item_idx = [i-num_users-1 for i in seen_item_idx] 
+            for item_idx in seen_item_idx:
+                pred[idx][item_idx] = -1e9
     
     top_k_val, top_k_idx = torch.topk(pred, top_k, dim=1)
     return top_k_idx

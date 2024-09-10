@@ -72,11 +72,13 @@ def load_data(
     assert max(edgelist[:,0]) > min(edgelist[:,1]), "user id and item id must be separated"
     edgelist[:,1] = edgelist[:,1] + num_of_nodes[0]
     if direction == False:
-        edgelist = edgelist.tolist()
-        for idx, edgelist in enumerate(edgelist):
-            fr, to, sign = edgelist
-            edgelist.append(to, fr, sign)
-        edgelist = np.array(edgelist)
+        edgelist_2 = edgelist.tolist()
+        temp_edgelist = []
+        for idx, edge in enumerate(edgelist):
+            fr, to, sign = edge
+            temp_edgelist.append([to, fr, sign])
+        edgelist_temp = np.array(temp_edgelist)
+        edgelist = np.concatenate((edgelist, edgelist_temp), axis=0)
 
     num_edges = np.array(edgelist).shape[0]
     

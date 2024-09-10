@@ -35,7 +35,7 @@ def main():
     datatemplate = DataTemplate(args_enviroments.dataset_name, args_enviroments.seed, args_enviroments.split_ratio, args_enviroments.dataset_shuffle, args_enviroments.device, args_enviroments.direction, args_enviroments.input_dim)
     train_dataset, valid_dataset, test_dataset, num_nodes = datatemplate.get_dataset()
     train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True, num_workers=0)
-    valid_loader = DataLoader(valid_dataset, batch_size=256, shuffle=False, num_workers=0, collate_fn=collate_fn)
+    valid_loader = DataLoader(valid_dataset, batch_size=1, shuffle=False, num_workers=0, collate_fn=collate_fn)
     test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False, num_workers=0, collate_fn=collate_fn)
     seen_items = train_dataset.get_seen_nodes()
     
@@ -60,9 +60,10 @@ def main():
             loss.backward()
             opt.step()
             total_loss += loss.item()
-        model.eval()
+        
         print(f"Epoch {epoch} Loss: {total_loss / len(train_loader)}")
         if epoch % 1 == 0:
+            model.eval()
             with torch.no_grad():
                 precision, recall = [], []
                 for batch in valid_loader:
