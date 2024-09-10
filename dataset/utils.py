@@ -111,3 +111,24 @@ def edgelist_to_user_item_dict(edgelist: np.array) -> dict:
     for edge in edgelist:
         user_item_dict[edge[0]].append(edge[1])
     return user_item_dict
+
+def rwr(edgelist, num_nodes, iter_K, alpha, device):
+    sum_nodes = sum(num_nodes)
+    A = torch.sparse_coo_tensor(torch.tensor(edgelist).T, torch.tensor([1]*len(edgelist[0])), torch.Size([sum_nodes, sum_nodes]), dtype=torch.float32)
+    A = torch.eye(sum_nodes) + A
+    row_sum = torch.sum(A, dim=1)
+    d_inv_row = 1.0 / row_sum.to_dense()
+    d_inv_row[torch.isinf(d_inv_row)] = 0
+    d_inv_matrix = torch.diag(d_inv_row)
+    A = A.to(torch.float32)
+    nA = torch.sparse.mm(d_inv_matrix, A)
+    nAT = nA.T.to(device)
+    
+    x0 = torch.eye(sum_nodes).to(device)
+    I = torch.eye(sum_nodes).to(device)
+    x = x0
+    for i in range(iter_K):
+        x = (1-alpha) * torch.sparse.mm(nAT, x) + alpha * I
+    
+    return x.T
+    

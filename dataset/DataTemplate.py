@@ -3,7 +3,7 @@ import numpy as np
 import torch.utils.data.dataset as Dataset
 import torch
 
-from dataset.utils import split_data, load_data
+from dataset.utils import split_data, load_data, rwr
 from dataset.DatasetClass import TrnDatasetClass, EvalDatasetClass
 
 
@@ -77,7 +77,11 @@ class DataTemplate(object):
         return [self.embeddings_user, self.embeddings_item]
         
     def build_trainnormajd(self):
-        self.adj_matrix = torch.sparse_coo_tensor(torch.LongTensor(self.processed_dataset["train_edges"]).T, torch.LongTensor(self.processed_dataset["train_label"]), torch.Size([sum(self.num_nodes), sum(self.num_nodes)]), dtype=torch.long, device=self.device)
+        if self.augmentation:
+            breakpoint()
+            self.adj_matrix = rwr(self.processed_dataset["train_edges"], self.num_nodes, self.device)
+        else:
+            self.adj_matrix = torch.sparse_coo_tensor(torch.LongTensor(self.processed_dataset["train_edges"]).T, torch.LongTensor(self.processed_dataset["train_label"]), torch.Size([sum(self.num_nodes), sum(self.num_nodes)]), dtype=torch.long, device=self.device)
         dense = self.adj_matrix.to_dense().abs().float()
         row_sum = torch.sum(dense.abs(), dim=1).float() #row sum
         col_sum = torch.sum(dense.abs(), dim=0).float() #col sum

@@ -17,5 +17,8 @@ def parsing():
     parser.add_argument('--wdc', default=0.001, type=float, help='wdc')
     parser.add_argument('--lr', default=0.01, type=float, help='lr')
     parser.add_argument('--topk', default=40, type=int, help='topk')
+    parser.add_argument('--iter_k', default=100, type=int, help='iter_k')
+    parser.add_argument('--alpha', default=0.1, type=float, help='alpha')
+    parser.add_argument('--aug', default=True, type=float, help='beta')
     args = parser.parse_args()
     return args
