@@ -77,18 +77,18 @@ class DataTemplate(object):
         return [self.embeddings_user, self.embeddings_item]
         
     def build_trainnormajd(self):
-        self.adj_matrix = torch.sparse_coo_tensor(torch.LongTensor(self.processed_dataset["train_edges"]).T, torch.LongTensor(self.processed_dataset["train_label"]), torch.Size([sum(self.num_nodes), sum(self.num_nodes)]), dtype=torch.long, device="cpu")
+        self.adj_matrix = torch.sparse_coo_tensor(torch.LongTensor(self.processed_dataset["train_edges"]).T, torch.LongTensor(self.processed_dataset["train_label"]), torch.Size([sum(self.num_nodes), sum(self.num_nodes)]), dtype=torch.long, device=self.device)
         #dense = self.adj_matrix.to_dense().abs().float()
         row_sum = torch.sum(self.adj_matrix.abs(), dim=1).float() #row sum
         col_sum = torch.sum(self.adj_matrix.abs(), dim=0).float() #col sum
         
-        d_inv_row = torch.pow(row_sum, -0.5).flatten()
-        d_inv_col = torch.pow(col_sum, -0.5).flatten()
+        d_inv_row = torch.pow(row_sum, -0.5).flatten().to_dense()
+        d_inv_col = torch.pow(col_sum, -0.5).flatten().to_dense()
         
         del row_sum, col_sum
         
-        d_mat_row = torch.diag(d_inv_row.to_dense()).to_sparse()
-        d_mat_col = torch.diag(d_inv_col.to_dense()).to_sparse()
+        d_mat_row = torch.diag(d_inv_row)
+        d_mat_col = torch.diag(d_inv_col)
         
         del d_inv_row, d_inv_col
         
@@ -96,7 +96,7 @@ class DataTemplate(object):
         norm_adj = norm_adj @ d_mat_col
         norm_adj = norm_adj.to_sparse()
         self.adj_matrix = norm_adj    
-        del d_mat_row, d_mat_col, norm_adj 
+        del norm_adj,row_sum, col_sum, d_inv_row, d_inv_col, d_mat_row, d_mat_col 
     
     def get_adj_matrix(self):
         return self.adj_matrix
