@@ -2,14 +2,16 @@
 import mlflow
 import torch 
 import dotmap
+import numpy as np
 
 #from
 from fire import Fire
 from parser import parsing
-from utils import set_random_seed, collate_fn, select_top_k, precision_recall_at_k
+from utils import set_random_seed, collate_fn, select_top_k, precision_recall
 from dataset.DataTemplate import DataTemplate
 from torch.utils.data import DataLoader 
 from model.LightGCN import LightGCN
+
 
 
 def main():
@@ -31,10 +33,11 @@ def main():
 
     # Step 1. Preprocessing the dataset and load the dataset
     datatemplate = DataTemplate(args_enviroments.dataset_name, args_enviroments.seed, args_enviroments.split_ratio, args_enviroments.dataset_shuffle, args_enviroments.device, args_enviroments.direction, args_enviroments.input_dim)
-    train_dataset, valid_dataset, test_dataset = datatemplate.get_dataset()
+    train_dataset, valid_dataset, test_dataset, num_nodes = datatemplate.get_dataset()
     train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True, num_workers=0)
-    valid_loader = DataLoader(valid_dataset, batch_size=2, shuffle=False, num_workers=0, collate_fn=collate_fn)
-    test_loader = DataLoader(test_dataset, batch_size=2, shuffle=False, num_workers=0, collate_fn=collate_fn)
+    valid_loader = DataLoader(valid_dataset, batch_size=256, shuffle=False, num_workers=0, collate_fn=collate_fn)
+    test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False, num_workers=0, collate_fn=collate_fn)
+    seen_items = train_dataset.get_seen_nodes()
     
     
     # Step 2. Model definition
@@ -66,10 +69,11 @@ def main():
                     user, items = batch
                     user, items = user.to(device), items
                     pred_rating = model.getUsersRating(user)
-                    pred_items = select_top_k(pred_rating, args_enviroments.topk)
-                    precision_recall_at_k(items, pred_items)
-                    breakpoint()
-                print(f"Epoch {epoch} Valid Precision: {sum(precision) / len(valid_loader)} Recall: {sum(recall) / len(valid_loader)}")
+                    pred_items = select_top_k(user, pred_rating, args_enviroments.topk, seen_items, num_nodes[0])
+                    batch_precision, batch_recall = precision_recall(items, pred_items, num_nodes[0])
+                    precision.append(batch_precision)
+                    recall.append(batch_recall)
+                print(f"Epoch {epoch} Valid Precision: {np.mean(precision)} Recall: {np.mean(recall)}")
         
     # Step 5. Evaluation
     

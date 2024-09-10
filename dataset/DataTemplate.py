@@ -48,20 +48,20 @@ class DataTemplate(object):
     def processing(
         self,
     ):
-        array_of_edges, self.num_nodes, self.num_edges, self.user_item_dict = load_data(
+        array_of_edges, self.num_nodes, self.num_edges = load_data(
             self.dataset_path, self.direction)
         processed_dataset = split_data(
-            self.user_item_dict, self.split_ratio, self.seed, self.dataset_shuffle)
+           array_of_edges ,self.split_ratio, self.seed, self.dataset_shuffle)
         processed_dataset["init_emb"] = self.set_init_embeddings() 
         self.processed_dataset = processed_dataset
         
 
     def get_dataset(self):
-        train_dataset = TrnDatasetClass(self.processed_dataset["train"], self.num_nodes, self.device)
-        val_dataset = EvalDatasetClass(self.processed_dataset["valid"], self.num_nodes, self.device)
-        test_dataset = EvalDatasetClass(self.processed_dataset["test"], self.num_nodes, self.device) 
+        train_dataset = TrnDatasetClass(self.processed_dataset["train_edges"], self.processed_dataset["train_label"], self.num_nodes)
+        val_dataset = EvalDatasetClass(self.processed_dataset["valid_edges"], self.processed_dataset["valid_label"], self.num_nodes)
+        test_dataset = EvalDatasetClass(self.processed_dataset["test_edges"], self.processed_dataset["test_label"], self.num_nodes) 
         
-        return train_dataset, val_dataset, test_dataset
+        return train_dataset, val_dataset, test_dataset, self.num_nodes
     
     def set_init_embeddings(self):
         """
@@ -77,18 +77,7 @@ class DataTemplate(object):
         return [self.embeddings_user, self.embeddings_item]
         
     def build_trainnormajd(self):
-        
-       
-        train_edge_idx = [[], []]
-        for i in self.processed_dataset["train"]:
-            targets = self.processed_dataset["train"][i]
-            for target in targets:
-                train_edge_idx[0].append(i)
-                train_edge_idx[1].append(target)
-        train_data = torch.ones(len(train_edge_idx[0]), dtype=torch.long)
-                
-        self.adj_matrix = torch.sparse_coo_tensor(torch.LongTensor(train_edge_idx), train_data, torch.Size([sum(self.num_nodes), sum(self.num_nodes)]), dtype=torch.long, device=self.device)
-    
+        self.adj_matrix = torch.sparse_coo_tensor(torch.LongTensor(self.processed_dataset["train_edges"]).T, torch.LongTensor(self.processed_dataset["train_label"]), torch.Size([sum(self.num_nodes), sum(self.num_nodes)]), dtype=torch.long, device=self.device)
         dense = self.adj_matrix.to_dense().abs().float()
         row_sum = torch.sum(dense.abs(), dim=1).float() #row sum
         col_sum = torch.sum(dense.abs(), dim=0).float() #col sum

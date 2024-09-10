@@ -2,6 +2,8 @@ import torch
 import numpy as np
 import torch.utils.data as data
 
+from dataset.utils import edgelist_to_user_item_dict
+
 class TrnDatasetClass(data.Dataset):
     """
     Dataset class with optimized negative sampling using numpy for set operations.
@@ -15,13 +17,13 @@ class TrnDatasetClass(data.Dataset):
     return:
         Dataset ready for DataLoader
     """
-    def __init__(self, user_item_dict: dict, num_nodes: tuple, device='cpu') -> None:
+    def __init__(self, edge, label, num_nodes: tuple, device='cpu') -> None:
         self.device = device
-        self.user_item_dict = user_item_dict
         self.num_nodes = num_nodes
+        self.user_item_dict = edgelist_to_user_item_dict(edge)
         # Negative sampling optimized to run during initialization
-        self.unseen_items = self.negative_sampling(user_item_dict, num_nodes)
-        self.user_list, self.pos, self.neg = self.flatten(user_item_dict, self.unseen_items)
+        self.unseen_items = self.negative_sampling(self.user_item_dict, num_nodes)
+        self.user_list, self.pos, self.neg = self.flatten(self.user_item_dict, self.unseen_items)
         self.len = len(self.user_list)
             
     def negative_sampling(self, user_item_dict: dict, num_nodes: tuple):
@@ -61,14 +63,17 @@ class TrnDatasetClass(data.Dataset):
     def __getitem__(self, index):
         # 각 데이터셋의 배치를 반환
         return  self.user_list[index], self.pos[index], self.neg[index]
+    
+    def get_seen_nodes(self):
+        return self.user_item_dict
 
 class EvalDatasetClass(data.Dataset):
-    def __init__(self, user_item_dict: dict, num_nodes: tuple, device='cpu') -> None:
+    def __init__(self, edge, label, num_nodes: tuple, device='cpu') -> None:
         self.device = device
-        self.user_item_dict = user_item_dict
         self.num_nodes = num_nodes
-        self.map_dict = self.mapping(user_item_dict)
-        self.len = len(self.map_dict)      
+        self.user_item_dict = edgelist_to_user_item_dict(edge)
+        self.map_dict = self.mapping(self.user_item_dict)
+        self.len = len(self.map_dict)     
         
     def __len__(self):
         return self.len
