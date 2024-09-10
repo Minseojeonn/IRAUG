@@ -41,13 +41,13 @@ def precision_recall(actual, recommended, num_users):
     len_actual = 0
     for ac, rec in zip(actual, recommended):
         intersection = set(ac).intersection(set(rec))
-        breakpoint()
+        #breakpoint()
         relevant_and_recommended.extend(list(intersection))
         len_actual += len(ac)
     # Precision: 추천된 항목 중에서 실제로 선호한 항목의 비율
-    precision = len(relevant_and_recommended) / (len(recommended_at_k[0]) * len(actual)) if recommended_at_k else 0
+    precision = len(relevant_and_recommended) / (len(recommended_at_k[0]) * len(actual)) 
     # Recall: 실제로 선호한 항목 중에서 추천된 항목의 비율
-    recall = len(relevant_and_recommended) / len_actual if actual else 0
+    recall = len(relevant_and_recommended) / len_actual
     
     return precision, recall
 
