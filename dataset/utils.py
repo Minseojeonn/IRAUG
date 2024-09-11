@@ -96,13 +96,12 @@ def get_num_nodes(
     Returns:
         num_nodes tuple(int, int): num_nodes_user, num_nodes_item
     """
-    num_nodes_user = np.amax(dataset[:, 0]) + 1
-    num_nodes_item = np.amax(dataset[:, 1]) + 1
+    num_nodes_user = np.amax(dataset[:, 0]) + 1 #idx max is 6039
+    num_nodes_item = np.amax(dataset[:, 1]) + 1 #idx max is 3951
     return (num_nodes_user.item(), num_nodes_item.item())
 
 
 def collate_fn(batch):
-    breakpoint()
     user, items = zip(*batch)
     return user, items
 
@@ -114,7 +113,7 @@ def edgelist_to_user_item_dict(edgelist: np.array) -> dict:
 
 def rwr(edgelist, num_nodes, iter_K, alpha, device):
     sum_nodes = sum(num_nodes)
-    A = torch.sparse_coo_tensor(torch.tensor(edgelist).T, torch.tensor([1]*len(edgelist[0])), torch.Size([sum_nodes, sum_nodes]), dtype=torch.float32)
+    A = torch.sparse_coo_tensor(torch.tensor(edgelist).T, torch.tensor([1]*edgelist.shape[0]), torch.Size([sum_nodes, sum_nodes]), dtype=torch.float32)
     A = torch.eye(sum_nodes) + A
     row_sum = torch.sum(A, dim=1)
     d_inv_row = 1.0 / row_sum.to_dense()

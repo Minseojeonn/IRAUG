@@ -30,6 +30,9 @@ class DataTemplate(object):
         device: str,
         direction: bool,
         input_dim: int,
+        augmentation: bool,
+        iter_k: int,
+        alpha: float
     ) -> None:
         self.dataset_name = dataset_name
         self.dataset_path = f"./dataset/{self.dataset_name}.tsv"
@@ -39,6 +42,9 @@ class DataTemplate(object):
         self.device = device
         self.direction = direction
         self.input_dim = input_dim
+        self.augmentation = augmentation
+        self.iter_k = iter_k
+        self.alpha = alpha
         assert np.isclose(sum(split_ratio), 1).item(
         ), "sum of split_ratio is not 1"
         self.processing()
@@ -78,28 +84,25 @@ class DataTemplate(object):
         
     def build_trainnormajd(self):
         if self.augmentation:
-            breakpoint()
-            self.adj_matrix = rwr(self.processed_dataset["train_edges"], self.num_nodes, self.device)
+            self.adj_matrix = rwr(self.processed_dataset["train_edges"], self.num_nodes, self.iter_k, self.alpha, self.device)
+            col_sum = torch.sum(self.adj_matrix.abs(), dim=0).float() #col sum
+            norm_adj = self.adj_matrix
+            #row normalizaed matrix
         else:
             self.adj_matrix = torch.sparse_coo_tensor(torch.LongTensor(self.processed_dataset["train_edges"]).T, torch.LongTensor(self.processed_dataset["train_label"]), torch.Size([sum(self.num_nodes), sum(self.num_nodes)]), dtype=torch.long, device=self.device)
-        dense = self.adj_matrix.to_dense().abs().float()
-        row_sum = torch.sum(dense.abs(), dim=1).float() #row sum
-        col_sum = torch.sum(dense.abs(), dim=0).float() #col sum
-        
-        d_inv_row = torch.pow(row_sum, -0.5).flatten()
+            dense = self.adj_matrix.to_dense().abs().float()
+            row_sum = torch.sum(dense.abs(), dim=1).float() #row sum
+            col_sum = torch.sum(dense.abs(), dim=0).float() #col sum
+            d_inv_row = torch.pow(row_sum, -0.5).flatten()
+            d_inv_row[torch.isinf(d_inv_row)] = 0.
+            d_mat_row = torch.diag(d_inv_row)
+            norm_adj = d_mat_row @ dense     
         d_inv_col = torch.pow(col_sum, -0.5).flatten()
-        
-        d_inv_row[torch.isinf(d_inv_row)] = 0.
         d_inv_col[torch.isinf(d_inv_col)] = 0.
-        
-        d_mat_row = torch.diag(d_inv_row)
         d_mat_col = torch.diag(d_inv_col)
-        
-        norm_adj = d_mat_row @ dense 
         norm_adj = norm_adj @ d_mat_col
         norm_adj = norm_adj.to_sparse()
         self.adj_matrix = norm_adj    
-        del norm_adj, dense, row_sum, col_sum, d_inv_row, d_inv_col, d_mat_row, d_mat_col 
     
     def get_adj_matrix(self):
         return self.adj_matrix

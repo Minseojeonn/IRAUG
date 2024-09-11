@@ -57,11 +57,14 @@ def select_top_k(user, pred, top_k, seen_items, num_users):
         pred (torch.tensor): (num_user, all_items)
         top_k (int): top k items
     """
+    smmallest = 9999
+    for item in seen_items:
+        smmallest = min(smmallest, min(seen_items[item]))
     if seen_items is not None:
         for idx, i in enumerate(user):
             user_idx = i.item()
             seen_item_idx = seen_items[user_idx]
-            seen_item_idx = [i-num_users-1 for i in seen_item_idx] 
+            seen_item_idx = [i-num_users for i in seen_item_idx] 
             for item_idx in seen_item_idx:
                 pred[idx][item_idx] = -1e9
     

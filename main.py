@@ -32,7 +32,7 @@ def main():
     device = args_enviroments.device
 
     # Step 1. Preprocessing the dataset and load the dataset
-    datatemplate = DataTemplate(args_enviroments.dataset_name, args_enviroments.seed, args_enviroments.split_ratio, args_enviroments.dataset_shuffle, args_enviroments.device, args_enviroments.direction, args_enviroments.input_dim)
+    datatemplate = DataTemplate(args_enviroments.dataset_name, args_enviroments.seed, args_enviroments.split_ratio, args_enviroments.dataset_shuffle, args_enviroments.device, args_enviroments.direction, args_enviroments.input_dim, args_enviroments.aug, args_enviroments.iter_k, args_enviroments.alpha)
     train_dataset, valid_dataset, test_dataset, num_nodes = datatemplate.get_dataset()
     train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True, num_workers=0)
     valid_loader = DataLoader(valid_dataset, batch_size=1, shuffle=False, num_workers=0, collate_fn=collate_fn)
@@ -65,16 +65,26 @@ def main():
         if epoch % 1 == 0:
             model.eval()
             with torch.no_grad():
-                precision, recall = [], []
+                val_precision, val_recall = [], []
                 for batch in valid_loader:
                     user, items = batch
                     user, items = user.to(device), items
                     pred_rating = model.getUsersRating(user)
                     pred_items = select_top_k(user, pred_rating, args_enviroments.topk, seen_items, num_nodes[0])
                     batch_precision, batch_recall = precision_recall(items, pred_items, num_nodes[0])
-                    precision.append(batch_precision)
-                    recall.append(batch_recall)
-                print(f"Epoch {epoch} Valid Precision: {np.mean(precision)} Recall: {np.mean(recall)}")
+                    val_precision.append(batch_precision)
+                    val_recall.append(batch_recall)
+                test_precision, test_recall = [], []
+                for batch in test_loader:
+                    user, items = batch
+                    user, items = user.to(device), items
+                    pred_rating = model.getUsersRating(user)
+                    pred_items = select_top_k(user, pred_rating, args_enviroments.topk, seen_items, num_nodes[0])
+                    batch_precision, batch_recall = precision_recall(items, pred_items, num_nodes[0])
+                    test_precision.append(batch_precision)
+                    test_recall.append(batch_recall)
+                print(f"Epoch {epoch} Valid Precision: {np.mean(val_precision)} Recall: {np.mean(val_recall)}")
+                print(f"Epoch {epoch} Test Precision: {np.mean(test_precision)} Recall: {np.mean(test_recall)}")
         
     # Step 5. Evaluation
     
