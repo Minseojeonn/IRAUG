@@ -7,7 +7,7 @@ import numpy as np
 #from
 from fire import Fire
 from parser import parsing
-from utils import set_random_seed, collate_fn, select_top_k, precision_recall
+from utils import set_random_seed, collate_fn, select_top_k, precision_recall, logging_metric_with_mlflow
 from dataset.DataTemplate import DataTemplate
 from torch.utils.data import DataLoader 
 from model.LightGCN import LightGCN
@@ -16,13 +16,14 @@ from model.LightGCN import LightGCN
 
 def main():
     args_enviroments = dotmap.DotMap(vars(parsing()))
+    breakpoint()
     #set env parameters
    
     # Set MLflow
     if args_enviroments.use_mlflow:
-        remote_server_uri = "http://localhost:5000"
+        remote_server_uri = "http://192.168.50.2:5001"
         mlflow.set_tracking_uri(remote_server_uri)
-        experiment_name = f"exper_name"
+        experiment_name = f"testing_for_lraug"
         mlflow.set_experiment(experiment_name)
         mlflow.start_run()
 
@@ -47,9 +48,27 @@ def main():
     opt = torch.optim.Adam(model.parameters(), lr=args_enviroments.lr)
     
     # Step 4. Training
+    # metrics
+    loss_list = []
+    loss_1_list = []
+    loss_2_list = []
+    best_recall_val = float('-inf')
+    best_prediction_val = float('-inf')
+    best_recall_test = float('-inf')
+    best_prediction_test = float('-inf')
+    best_recall_epoch = -1
+    best_prediction_epoch = -1
+    recall_val_list = []
+    recall_test_list = []
+    prediction_val_list = []
+    prediction_test_list = []
+    
+    
     for epoch in range(args_enviroments.epochs):
         model.train()
         total_loss = 0
+        total_loss_1 = 0
+        total_loss_2 = 0    
         for batch in train_loader:
             #label is not used, cause it is unsigned model
             opt.zero_grad()
@@ -60,9 +79,13 @@ def main():
             loss.backward()
             opt.step()
             total_loss += loss.item()
-        
+            total_loss_1 += loss_1.item()
+            total_loss_2 += loss_2.item()
+        loss_list.append(total_loss / len(train_loader))
+        loss_1_list.append(total_loss_1 / len(train_loader))
+        loss_2_list.append(total_loss_2 / len(train_loader))
         print(f"Epoch {epoch} Loss: {total_loss / len(train_loader)}")
-        if epoch % 1 == 0:
+        if epoch % 1 == 0: #testing every 1 epochs (for debugging)
             model.eval()
             with torch.no_grad():
                 val_precision, val_recall = [], []
@@ -85,9 +108,40 @@ def main():
                     test_recall.append(batch_recall)
                 print(f"Epoch {epoch} Valid Precision: {np.mean(val_precision)} Recall: {np.mean(val_recall)}")
                 print(f"Epoch {epoch} Test Precision: {np.mean(test_precision)} Recall: {np.mean(test_recall)}")
-        
-    # Step 5. Evaluation
+                recall_val_list.append(np.mean(val_recall))
+                recall_test_list.append(np.mean(test_recall))
+                prediction_val_list.append(np.mean(val_precision))
+                prediction_test_list.append(np.mean(test_precision))
+                if np.mean(val_recall) > best_recall_val:
+                    best_recall_val = np.mean(val_recall)
+                    best_recall_epoch = epoch
+                    best_recall_test = np.mean(test_recall)
+                if np.mean(val_precision) > best_prediction_val:
+                    best_prediction_val = np.mean(val_precision)
+                    best_prediction_epoch = epoch
+                    best_prediction_test = np.mean(test_precision)
+                
+    # Step 5. mlflow logging
+    if args_enviroments.use_mlflow:
+        mlflow.log_params(dict(args_enviroments))
+        logging_targets = {
+            "best_recall_val": best_recall_val,
+            "best_recall_test": best_recall_test,
+            "best_recall_epoch": best_recall_epoch,
+            "best_prediction_val": best_prediction_val,
+            "best_prediction_test": best_prediction_test,
+            "best_prediction_epoch": best_prediction_epoch,
+            "loss_list": loss_list,
+            "loss_1_list": loss_1_list,
+            "loss_2_list": loss_2_list,
+            "recall_val_list": recall_val_list,
+            "recall_test_list": recall_test_list,
+            "prediction_val_list": prediction_val_list,
+            "prediction_test_list": prediction_test_list
+        }
+        logging_metric_with_mlflow(logging_targets)
     
+    mlflow.end_run()
 
 if __name__ == "__main__":
     Fire(main)

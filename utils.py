@@ -1,7 +1,9 @@
 import random
 import torch
-from sklearn.metrics import roc_auc_score
 import numpy as np
+import mlflow
+
+from sklearn.metrics import roc_auc_score
 
 def set_random_seed(seed, device):
     if device == 'cpu':
@@ -20,8 +22,23 @@ def set_random_seed(seed, device):
             torch.backends.cudnn.deterministic = True
             torch.backends.cudnn.benchmark = False
 
-def logging_with_mlflow(epochs, val_metric, test_metric):
-    pass
+def logging_metric_with_mlflow(result_list):
+    for idx in range(len(result_list["loss_list"])):
+        mlflow.log_metric("loss_list", result_list["loss_list"][idx], step=idx, synchronous=False)
+        mlflow.log_metric("loss_1_list", result_list["loss_1_list"][idx], step=idx, synchronous=False)
+        mlflow.log_metric("loss_2_list", result_list["loss_2_list"][idx], step=idx, synchronous=False)
+        mlflow.log_metric("recall_val_list", result_list["recall_val_list"][idx], step=idx, synchronous=False)
+        mlflow.log_metric("recall_test_list", result_list["recall_test_list"][idx], step=idx, synchronous=False)
+        mlflow.log_metric("prediction_val_list", result_list["prediction_val_list"][idx], step=idx, synchronous=False)
+        mlflow.log_metric("prediction_test_list", result_list["prediction_test_list"][idx], step=idx, synchronous=False)
+    mlflow.log_metric("best_recall_val", result_list["best_recall_val"])
+    mlflow.log_metric("best_prediction_val", result_list["best_prediction_val"])
+    mlflow.log_metric("best_recall_test", result_list["best_recall_test"])
+    mlflow.log_metric("best_prediction_test", result_list["best_prediction_test"])
+    mlflow.log_metric("best_recall_epoch", result_list["best_recall_epoch"])
+    mlflow.log_metric("best_prediction_epoch", result_list["best_prediction_epoch"])
+        
+                                                                                                    
 
 def collate_fn(batch):
     user, items = zip(*batch)
