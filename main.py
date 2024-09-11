@@ -16,14 +16,13 @@ from model.LightGCN import LightGCN
 
 def main():
     args_enviroments = dotmap.DotMap(vars(parsing()))
-    breakpoint()
     #set env parameters
    
     # Set MLflow
     if args_enviroments.use_mlflow:
         remote_server_uri = "http://192.168.50.2:5001"
         mlflow.set_tracking_uri(remote_server_uri)
-        experiment_name = f"testing_for_lraug"
+        experiment_name = f"lraug-{args_enviroments.dataset_name}-{args_enviroments.seed}"
         mlflow.set_experiment(experiment_name)
         mlflow.start_run()
 
@@ -146,5 +145,4 @@ def main():
     
     mlflow.end_run()
 
-if __name__ == "__main__":
-    Fire(main)
+main()
