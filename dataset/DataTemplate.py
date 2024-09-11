@@ -43,6 +43,7 @@ class DataTemplate(object):
         self.direction = direction
         self.input_dim = input_dim
         self.augmentation = augmentation
+        print(self.augmentation)
         self.iter_k = iter_k
         self.alpha = alpha
         assert np.isclose(sum(split_ratio), 1).item(
