@@ -121,7 +121,7 @@ def main():
                     best_prediction_test = np.mean(test_precision)
                     indure = 0
                 indure += 1
-                if indure_count <= args_enviroments.indure:
+                if indure_count >= args_enviroments.indure:
                     break
     # Step 5. mlflow logging
     if args_enviroments.use_mlflow:
