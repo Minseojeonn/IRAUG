@@ -20,5 +20,6 @@ def parsing():
     parser.add_argument('--iter_k', default=100, type=int, help='iter_k')
     parser.add_argument('--alpha', default=0.5, type=float, help='alpha')
     parser.add_argument('--aug', default=False, type=float, help='beta')
+    parser.add_argument('--indure', default=5, type=int, help='indure')
     args = parser.parse_args()
     return args

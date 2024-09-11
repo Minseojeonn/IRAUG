@@ -62,8 +62,7 @@ def main():
     recall_test_list = []
     prediction_val_list = []
     prediction_test_list = []
-    
-    
+    indure_count = 0
     for epoch in range(args_enviroments.epochs):
         model.train()
         total_loss = 0
@@ -116,11 +115,15 @@ def main():
                     best_recall_val = np.mean(val_recall)
                     best_recall_epoch = epoch
                     best_recall_test = np.mean(test_recall)
+                    indure = 0
                 if np.mean(val_precision) > best_prediction_val:
                     best_prediction_val = np.mean(val_precision)
                     best_prediction_epoch = epoch
                     best_prediction_test = np.mean(test_precision)
-                
+                    indure = 0
+                indure += 1
+                if indure_count <= args_enviroments.indure:
+                    break
     # Step 5. mlflow logging
     if args_enviroments.use_mlflow:
         mlflow.log_params(dict(args_enviroments))
