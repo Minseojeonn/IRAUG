@@ -22,11 +22,11 @@ class TrnDatasetClass(data.Dataset):
         self.num_nodes = num_nodes
         self.user_item_dict = edgelist_to_user_item_dict(edge)
         # Negative sampling optimized to run during initialization
-        self.unseen_items = self.negative_sampling(self.user_item_dict, num_nodes)
-        self.user_list, self.pos, self.neg = self.flatten(self.user_item_dict, self.unseen_items)
+        self.unseen_item_dict = self.negative_sampling(self.user_item_dict, num_nodes)
+        self.user_list, self.pos = self.flatten(self.user_item_dict)
         self.len = len(self.user_list)
             
-    def negative_sampling(self, user_item_dict: dict, num_nodes: tuple):
+    def negative_sampling(self, user_item_dict: dict, num_nodes: tuple) -> dict:
         """
         Optimized negative sampling using numpy for set operations.
         """
@@ -38,32 +38,32 @@ class TrnDatasetClass(data.Dataset):
         for user in user_item_dict:
             seen_items = np.array(user_item_dict[user])  # 사용자가 본 아이템
             unseen_items = np.setdiff1d(all_items, seen_items)  # 보지 않은 아이템 찾기
-            unseen_items = np.random.choice(unseen_items, size=len(user_item_dict[user]))  # 보지 않은 아이템 중 샘플링
             unseen_item_dict[user] = unseen_items
 
         return unseen_item_dict
     
-    def flatten(self, user_item_dict, unseen_item_dict):
+    def flatten(self, user_item_dict):
         """
         Flatten user-item interactions and negative samples for DataLoader.
         """
         user_list = []
         pos_list = []
-        neg_list = []
         for user in user_item_dict:
-            for pos, neg in zip(user_item_dict[user], unseen_item_dict[user]):
+            for pos in user_item_dict[user]:
                 user_list.append(user)
                 pos_list.append(pos)
-                neg_list.append(neg)
             
-        return user_list, pos_list, neg_list
+        return user_list, pos_list
+    
+    def get_neg_smaples(self, user):
+        return np.random.choice(self.unseen_item_dict[user], 1).item()
     
     def __len__(self):
         return self.len
     
     def __getitem__(self, index):
         # 각 데이터셋의 배치를 반환
-        return  self.user_list[index], self.pos[index], self.neg[index]
+        return  self.user_list[index], self.pos[index], self.get_neg_smaples(self.user_list[index]) 
     
     def get_seen_nodes(self):
         return self.user_item_dict
