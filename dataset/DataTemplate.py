@@ -3,7 +3,7 @@ import numpy as np
 import torch.utils.data.dataset as Dataset
 import torch
 
-from dataset.utils import split_data, load_data, rwr
+from dataset.utils import split_data, load_data, rwr, rwr_with_filter
 from dataset.DatasetClass import TrnDatasetClass, EvalDatasetClass
 
 
@@ -32,7 +32,8 @@ class DataTemplate(object):
         input_dim: int,
         augmentation: bool,
         iter_k: int,
-        alpha: float
+        alpha: float,
+        eps : float
     ) -> None:
         self.dataset_name = dataset_name
         self.dataset_path = f"./dataset/{self.dataset_name}.tsv"
@@ -43,6 +44,7 @@ class DataTemplate(object):
         self.direction = direction
         self.input_dim = input_dim
         self.augmentation = augmentation
+        self.eps = eps
         print(self.augmentation)
         self.iter_k = iter_k
         self.alpha = alpha
@@ -85,7 +87,7 @@ class DataTemplate(object):
         
     def build_trainnormajd(self):
         if self.augmentation:
-            self.adj_matrix = rwr(self.processed_dataset["train_edges"], self.num_nodes, self.iter_k, self.alpha, self.device)
+            self.adj_matrix = rwr_with_filter(self.processed_dataset["train_edges"], self.num_nodes, self.iter_k, self.alpha, self.device, self.eps)
             col_sum = torch.sum(self.adj_matrix.abs(), dim=0).float() #col sum
             norm_adj = self.adj_matrix
             #row normalizaed matrix

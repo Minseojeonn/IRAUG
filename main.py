@@ -32,7 +32,7 @@ def main():
     device = args_enviroments.device
 
     # Step 1. Preprocessing the dataset and load the dataset
-    datatemplate = DataTemplate(args_enviroments.dataset_name, args_enviroments.seed, args_enviroments.split_ratio, args_enviroments.dataset_shuffle, args_enviroments.device, args_enviroments.direction, args_enviroments.input_dim, args_enviroments.aug, args_enviroments.iter_k, args_enviroments.alpha)
+    datatemplate = DataTemplate(args_enviroments.dataset_name, args_enviroments.seed, args_enviroments.split_ratio, args_enviroments.dataset_shuffle, args_enviroments.device, args_enviroments.direction, args_enviroments.input_dim, args_enviroments.aug, args_enviroments.iter_k, args_enviroments.alpha, args_enviroments.eps)
     train_dataset, valid_dataset, test_dataset, num_nodes = datatemplate.get_dataset()
     train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True, num_workers=0)
     valid_loader = DataLoader(valid_dataset, batch_size=1, shuffle=False, num_workers=0, collate_fn=collate_fn)
