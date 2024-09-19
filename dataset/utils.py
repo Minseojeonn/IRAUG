@@ -150,14 +150,16 @@ def rwr_with_filter(edgelist, num_nodes, iter_K, alpha, device, eps):
         x = (1-alpha) * torch.sparse.mm(nAT, x) + alpha * I
     x = torch.where(x < eps, torch.tensor(0.0).to(device), x)
     
-    breakpoint()
     
     if torch.sum(torch.sum(x, dim=0) == torch.sum(x, dim=1)) == x.shape[0]:
         raise ValueError("filtering eps is too high, it remains only diag elements")
     
+    x = x.T
     row_sum = torch.sum(x.abs(), dim=1).float() #row sum
+    d_inv_row = torch.pow(row_sum, -0.5).flatten()
+    d_inv_row[torch.isinf(d_inv_row)] = 0.
     d_mat_row = torch.diag(d_inv_row)
     norm_adj = d_mat_row @ x.to_dense()  
-
-    return norm_adj.T
+    
+    return norm_adj
     
