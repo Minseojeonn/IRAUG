@@ -128,8 +128,7 @@ def rwr(edgelist, num_nodes, iter_K, alpha, device):
     x = x0
     for i in range(iter_K):
         x = (1-alpha) * torch.sparse.mm(nAT, x) + alpha * I
-    
-    breakpoint()
+
     return x.T
 
 def rwr_with_filter(edgelist, num_nodes, iter_K, alpha, device, eps):
@@ -151,7 +150,9 @@ def rwr_with_filter(edgelist, num_nodes, iter_K, alpha, device, eps):
         x = (1-alpha) * torch.sparse.mm(nAT, x) + alpha * I
     x = torch.where(x < eps, torch.tensor(0.0).to(device), x)
     
-    if torch.sum(torch.sum(x, dim=0) == torch.sum(x, dim=1)):
+    breakpoint()
+    
+    if torch.sum(torch.sum(x, dim=0) == torch.sum(x, dim=1)) == x.shape[0]:
         raise ValueError("filtering eps is too high, it remains only diag elements")
     
     row_sum = torch.sum(x.abs(), dim=1).float() #row sum
