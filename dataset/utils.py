@@ -155,6 +155,10 @@ def rwr_with_filter(edgelist, num_nodes, iter_K, alpha, device, eps):
         raise ValueError("filtering eps is too high, it remains only diag elements")
     
     x = x.T
+    
+    eye_matrix = torch.eye(x.size(0)).to(device)
+    x = x * (1 - eye_matrix)
+    
     row_sum = torch.sum(x.abs(), dim=1).float() #row sum
     d_inv_row = torch.pow(row_sum, -0.5).flatten()
     d_inv_row[torch.isinf(d_inv_row)] = 0.
