@@ -167,3 +167,40 @@ def rwr_with_filter(edgelist, num_nodes, iter_K, alpha, device, eps):
     
     return norm_adj
     
+def rwr_with_non_weighted_diffusion(edgelist, num_nodes, iter_K, alpha, device, eps):
+    sum_nodes = sum(num_nodes)
+    A = torch.sparse_coo_tensor(torch.tensor(edgelist).T, torch.tensor([1]*edgelist.shape[0]), torch.Size([sum_nodes, sum_nodes]), dtype=torch.float32)
+    A = torch.eye(sum_nodes) + A
+    row_sum = torch.sum(A, dim=1)
+    d_inv_row = 1.0 / row_sum.to_dense()
+    d_inv_row[torch.isinf(d_inv_row)] = 0
+    d_inv_matrix = torch.diag(d_inv_row)
+    A = A.to(torch.float32)
+    nA = torch.sparse.mm(d_inv_matrix, A)
+    nAT = nA.T.to(device)
+    
+    x0 = torch.eye(sum_nodes).to(device)
+    I = torch.eye(sum_nodes).to(device)
+    x = x0
+    for i in range(iter_K):
+        x = (1-alpha) * torch.sparse.mm(nAT, x) + alpha * I
+    x = torch.where(x < eps, torch.tensor(0.0).to(device), x)
+    
+    if torch.sum(torch.sum(x, dim=0) == torch.sum(x, dim=1)) == x.shape[0]:
+        raise ValueError("filtering eps is too high, it remains only diag elements")
+    
+    x = x.T
+    
+    x = torch.where(x > 0, torch.tensor(1.0).to(device), x)
+    
+    #Remove Diag elements
+    eye_matrix = torch.eye(x.size(0)).to(device)
+    x = x * (1 - eye_matrix)
+    
+    row_sum = torch.sum(x.abs(), dim=1).float() #row sum
+    d_inv_row = torch.pow(row_sum, -0.5).flatten()
+    d_inv_row[torch.isinf(d_inv_row)] = 0.
+    d_mat_row = torch.diag(d_inv_row)
+    norm_adj = d_mat_row @ x.to_dense()  
+    
+    return norm_adj
