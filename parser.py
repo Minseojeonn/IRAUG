@@ -9,7 +9,7 @@ def parsing():
     parser.add_argument('--dataset_name', default="ml-1m", type=str, help='dataset_name')
     parser.add_argument('--split_ratio', default=[0.8, 0.1, 0.1], type=list, help='split_ratio')
     parser.add_argument('--dataset_shuffle', default=True, type=bool, help='dataset_shuffle')
-    parser.add_argument('--direction', default=True, type=bool, help='direction')
+    parser.add_argument('--direction', default=False, type=bool, help='direction')
     parser.add_argument('--input_dim', default=64, type=int, help='input_dim')
     parser.add_argument('--batch_size', default=256, type=int, help='batch_size')
     parser.add_argument('--num_layers', default=3, type=int, help='num_layer')

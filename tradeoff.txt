@@ -1,0 +1,50 @@
+eps: 0.1, alpha: 0.1, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.001, alpha: 0.1, before_filtered: 810159.0  after_filtering: 772053.0
+eps: 1e-05, alpha: 0.1, before_filtered: 810159.0  after_filtering: 800167.0
+eps: 0.2, alpha: 0.1, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.1, alpha: 0.2, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.001, alpha: 0.2, before_filtered: 810159.0  after_filtering: 757908.0
+eps: 1e-05, alpha: 0.2, before_filtered: 810159.0  after_filtering: 800167.0
+eps: 0.2, alpha: 0.2, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.1, alpha: 0.3, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.001, alpha: 0.3, before_filtered: 810159.0  after_filtering: 734352.0
+eps: 1e-05, alpha: 0.3, before_filtered: 810159.0  after_filtering: 800167.0
+eps: 0.2, alpha: 0.3, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.1, alpha: 0.4, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.001, alpha: 0.4, before_filtered: 810159.0  after_filtering: 694064.0
+eps: 1e-05, alpha: 0.4, before_filtered: 810159.0  after_filtering: 800167.0
+eps: 0.2, alpha: 0.4, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.1, alpha: 0.5, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.001, alpha: 0.5, before_filtered: 810159.0  after_filtering: 641909.0
+eps: 1e-05, alpha: 0.5, before_filtered: 810159.0  after_filtering: 800167.0
+eps: 0.2, alpha: 0.5, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.1, alpha: 0.6, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.001, alpha: 0.6, before_filtered: 810159.0  after_filtering: 568556.0
+eps: 1e-05, alpha: 0.6, before_filtered: 810159.0  after_filtering: 800167.0
+eps: 0.2, alpha: 0.6, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.1, alpha: 0.7, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.001, alpha: 0.7, before_filtered: 810159.0  after_filtering: 472198.0
+eps: 1e-05, alpha: 0.7, before_filtered: 810159.0  after_filtering: 800167.0
+eps: 0.2, alpha: 0.7, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.1, alpha: 0.8, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.001, alpha: 0.8, before_filtered: 810159.0  after_filtering: 338817.0
+eps: 1e-05, alpha: 0.8, before_filtered: 810159.0  after_filtering: 800167.0
+eps: 0.2, alpha: 0.8, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.1, alpha: 0.9, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 0.001, alpha: 0.9, before_filtered: 810159.0  after_filtering: 165809.0
+eps: 1e-05, alpha: 0.9, before_filtered: 810159.0  after_filtering: 800167.0
+eps: 0.2, alpha: 0.9, before_filtered: 810159.0  after_filtering: remain only diag elements 
+eps: 1e-09, alpha: 0.5, before_filtered: 810159.0  after_filtering: 800167.0
+eps: 1e-09, alpha: 0.5, before_filtered: 810159.0  after_filtering: 800167.0
+eps: 1e-09, alpha: 0.5, before_filtered: 810159.0  after_filtering: 800167.0
+eps: 1e-09, alpha: 0.5, before_filtered: 94420080.0  after_filtering: 94402368.0
+eps: 1e-09, alpha: 0.5, before_filtered: 94420080.0  after_filtering: 94402368.0
+eps: 1e-09, alpha: 0.5, before_filtered: 94420080.0  after_filtering: 94402368.0
+eps: 1e-09, alpha: 0.5, before_filtered: 94420080.0  after_filtering: 94402368.0
+eps: 1e-09, alpha: 0.5, before_filtered: 94420080.0  after_filtering: 94402368.0
+eps: 1e-09, alpha: 0.5, before_filtered: 94420080.0  after_filtering: 94402368.0
+eps: 1e-09, alpha: 0.5, before_filtered: 94420080.0  after_filtering: 94402368.0
+eps: 1e-09, alpha: 0.5, before_filtered: 94420080.0  after_filtering: 94402368.0
+eps: 1e-09, alpha: 0.5, before_filtered: 94420080.0  after_filtering: 94402368.0
+eps: 1e-09, alpha: 0.5, before_filtered: 94420080.0  after_filtering: 94402368.0
+eps: 1e-09, alpha: 0.5, before_filtered: 94420080.0  after_filtering: 94402368.0

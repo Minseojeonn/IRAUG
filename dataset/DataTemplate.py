@@ -45,7 +45,6 @@ class DataTemplate(object):
         self.input_dim = input_dim
         self.augmentation = augmentation
         self.eps = eps
-        print(self.augmentation)
         self.iter_k = iter_k
         self.alpha = alpha
         assert np.isclose(sum(split_ratio), 1).item(
@@ -66,9 +65,9 @@ class DataTemplate(object):
         
 
     def get_dataset(self):
-        train_dataset = TrnDatasetClass(self.processed_dataset["train_edges"], self.processed_dataset["train_label"], self.num_nodes)
-        val_dataset = EvalDatasetClass(self.processed_dataset["valid_edges"], self.processed_dataset["valid_label"], self.num_nodes)
-        test_dataset = EvalDatasetClass(self.processed_dataset["test_edges"], self.processed_dataset["test_label"], self.num_nodes) 
+        train_dataset = TrnDatasetClass(self.direction, self.processed_dataset["train_edges"], self.processed_dataset["train_label"], self.num_nodes)
+        val_dataset = EvalDatasetClass(self.direction, self.processed_dataset["valid_edges"], self.processed_dataset["valid_label"], self.num_nodes)
+        test_dataset = EvalDatasetClass(self.direction, self.processed_dataset["test_edges"], self.processed_dataset["test_label"], self.num_nodes) 
         
         return train_dataset, val_dataset, test_dataset, self.num_nodes
     
@@ -89,12 +88,6 @@ class DataTemplate(object):
         if self.augmentation:
             self.adj_matrix = rwr_with_non_weighted_diffusion(self.processed_dataset["train_edges"], self.num_nodes, self.iter_k, self.alpha, self.device, self.eps)
             dense = self.adj_matrix.to_dense().abs().float()
-            row_sum = torch.sum(dense.abs(), dim=1).float() #row sum
-            col_sum = torch.sum(dense.abs(), dim=0).float() #col sum
-            d_inv_row = torch.pow(row_sum, -0.5).flatten()
-            d_inv_row[torch.isinf(d_inv_row)] = 0.
-            d_mat_row = torch.diag(d_inv_row)
-            norm_adj = d_mat_row @ dense
             '''
             self.adj_matrix = rwr_with_filter(self.processed_dataset["train_edges"], self.num_nodes, self.iter_k, self.alpha, self.device, self.eps)
             col_sum = torch.sum(self.adj_matrix.abs(), dim=0).float() #col sum
@@ -103,13 +96,13 @@ class DataTemplate(object):
             '''
         else:
             self.adj_matrix = torch.sparse_coo_tensor(torch.LongTensor(self.processed_dataset["train_edges"]).T, torch.LongTensor(self.processed_dataset["train_label"]), torch.Size([sum(self.num_nodes), sum(self.num_nodes)]), dtype=torch.long, device=self.device)
-            dense = self.adj_matrix.to_dense().abs().float()
-            row_sum = torch.sum(dense.abs(), dim=1).float() #row sum
-            col_sum = torch.sum(dense.abs(), dim=0).float() #col sum
-            d_inv_row = torch.pow(row_sum, -0.5).flatten()
-            d_inv_row[torch.isinf(d_inv_row)] = 0.
-            d_mat_row = torch.diag(d_inv_row)
-            norm_adj = d_mat_row @ dense     
+            dense = self.adj_matrix.to_dense().abs().float()   
+        row_sum = torch.sum(dense.abs(), dim=1).float() #row sum
+        col_sum = torch.sum(dense.abs(), dim=0).float() #col sum
+        d_inv_row = torch.pow(row_sum, -0.5).flatten()
+        d_inv_row[torch.isinf(d_inv_row)] = 0.
+        d_mat_row = torch.diag(d_inv_row)
+        norm_adj = d_mat_row @ dense
         d_inv_col = torch.pow(col_sum, -0.5).flatten()
         d_inv_col[torch.isinf(d_inv_col)] = 0.
         d_mat_col = torch.diag(d_inv_col)

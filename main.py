@@ -22,7 +22,7 @@ def main():
     if args_enviroments.use_mlflow:
         remote_server_uri = "http://192.168.50.2:5001"
         mlflow.set_tracking_uri(remote_server_uri)
-        experiment_name = f"lraug-{args_enviroments.dataset_name}-{args_enviroments.seed}"
+        experiment_name = f"undirected_settings-{args_enviroments.dataset_name}-{args_enviroments.seed}-{args_enviroments.aug}"
         mlflow.set_experiment(experiment_name)
         mlflow.start_run()
 
